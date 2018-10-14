@@ -49,7 +49,42 @@ Souhaitant se désengager de cette spécification afin de se concentrer sur le l
  ### Exercice 2 : Un additionneur via HTTP
  - Créer un additionneur de deux entiers qui en POST execute la somme des entiers en paramètres et en GET renvoie le dernier résultat qu'il a calculé ou undefined si rien n'est calculé.
 
-### Exercice 3 : Un soustracteur via EJB
+### Exercice 3 : L'injection façon JEE avec CDI
+#### Qu 'est ce que CDI ?
+CDI (Context Dependency Injection) est une spécification destinée à standardiser les injections de dépendances et de contextes au sein de la plate forme java et particulièrement JEE.
 
-  
- 
+Le mécanisme d'injection est fait comme pour Spring par l'utilisation d'annotation :
+- @Inject permet d'injecter une dépendance (@Autowired de spring)
+- @Named correspond au @Qualifier de Spring (doit être présent aussi sur la classe que l'on veut injecter avec le même nom) par défaut le nom appliquer est l'équivalent camelCase de la classe.
+- Différents scopes : @RequestScoped (scope http), @SessionScoped (lié à la session HTTP) @ApplicationScope (lié à l'application) @Dependent (crée une nouvelle instance pour l'injection en cours, équivalent au scope prototype de Spring)
+
+Attention, tous les beans de CDI sont par défaut en scope @Dependent
+
+Pour scanner les beans, il faut définir un fichier XML dans le répertoire META-INF d'un jar ou WEB-INF d'un war
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee 
+       http://xmlns.jcp.org/xml/ns/javaee/beans_1_1.xsd"
+       bean-discovery-mode="all">
+</beans>
+```
+
+#### Le soustracteur façon JEE avec CDI
+Une calculatrice effectue des opérations arithmétiques qui prennent en paramètre deux opérandes et leur applique un opérateur.
+
+Un opération est donc composer de trois élément :
+- 2 paramètres
+- 1 opérandes.
+
+Son code pourrait ressembler à ça :
+
+```java
+public class Calculatrice {
+    public static void main(String... args){
+        Operande operande = new AddOperande();
+        operande.execute(leftParam, rightParam);
+    }
+}
+```
