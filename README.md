@@ -47,6 +47,9 @@ Souhaitant se désengager de cette spécification afin de se concentrer sur le l
  - Analyser les différences de structure entre chaque archive
  
  ### Exercice 2 : Un additionneur via HTTP
- - Créer un additionneur de deux entiers qui appelait en POST execute la somme des entiers en paramètres et en GET renvoie le dernier résultat qu'il a calculé.
+ - Créer un additionneur de deux entiers qui en POST execute la somme des entiers en paramètres et en GET renvoie le dernier résultat qu'il a calculé ou undefined si rien n'est calculé.
+
+### Exercice 3 : Un soustracteur via EJB
+
   
  
