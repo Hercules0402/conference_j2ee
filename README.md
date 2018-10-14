@@ -83,8 +83,26 @@ Son code pourrait ressembler à ça :
 ```java
 public class Calculatrice {
     public static void main(String... args){
-        Operande operande = new AddOperande();
-        operande.execute(leftParam, rightParam);
+        Operateur operateur = new AddOperateur();
+        operateur.execute(leftParam, rightParam);
     }
 }
 ```
+
+- ajouter la dépendance javaee-api à votre projet.
+- créer un servlet soustracteur au norme CDI.
+
+### Exercice 4 : L'injection de resource JNDI
+#### Qu'est ce que JNDI
+#### Injection d'une DataSource
+
+### Exercice 5 : Approche des EJB's
+
+#### Session : Stateless / Statefull
+#### Entity : La persistence en action
+#### Message : pourquoi on ne traiterait pas en arrière plan
+
+## Performance et monitoring
+### Thread Dump
+### Heap Dump
+### Monitoring
