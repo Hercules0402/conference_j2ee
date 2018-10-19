@@ -185,12 +185,59 @@ Ils permettent le développement rapide d'objets métiers pour des applications 
 
 IL existe plusieurs spécifications, la dernière en date est la 3.0
 
-C'est celle que nous utiliserons pour la suite, la spécification 2.1 est obsolète et disparaitra des serveurs d'ici 2020
+C'est celle que nous utiliserons pour la suite, la spécification 2.1 est obsolète et disparaitra d'ici 2020
  des serveurs.
  
  Il existe plusieurs type d'EJB que nous allons détailler.
 
-#### Session : Stateless / Statefull
+#### Les EJB au sein d'une application
+Les EJB font partie d'un module à part ayant un packaging ejb.
+
+Ils sont introduit au sein de l'ear par une directive ejbModule.
+
+En fonction des serveurs, il est peut etre nécessaire d'adjoindre dans le META-INF du module un fichier xml de description
+appelé descripteur de déploiement. Voici quelques exemples :
+- ejb-jar.xml : le descripteur par défaut, équivalent au web.xml ou l'application.xml des war et ear
+- weblogic-ejb-jar.xml : le descripteur propre à weblogic
+- jboss-ejbèjar.xml : celui de jboss
+- etc ...
+
+A vous de voir en fonction des infrastructures.
+
+#### Session : Le service au client
+Les EJB Session représente le type d'EJB le plus utilisé. Ils fournissent un service au client.
+
+2 annotations définissent leur protocole de contact :
+- @Local
+- @Remote
+
+2 annotations définissent leur états :
+- @Stateless
+- @Statefull
+
+Ils représentent le point d'entrée de la couche métier.
+
+Quelles différences faites vous entre ces annotations ?
+
+Pour définir un EJB session nous avons besoin :
+- d'un contrat, une interface dépendante d'un protocole afin d'être appelé
+- d'une implémentation définissant le type d'EJB qui nous intéresse.
+
+##### Le session Stateless
+- Créez un module ejb
+- Ajoutez un EJB effectuant le produit de deux entiers.
+- Intégrez ce module dans votre application
+- Déployez la
+
+Une fois déployez appeler votre EJB.
+
+##### Le session Statefull
+Creer un EJB Statefull au sein de votre module.
+
+Cet ejb sera voué à tracer un historique des calculs effectués par votre calculatrice.
+
+Modifier votre code en conséquence.
+
 #### Entity : La persistence en action
 #### Message : pourquoi on ne traiterait pas en arrière plan
 
