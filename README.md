@@ -231,12 +231,33 @@ Pour définir un EJB session nous avons besoin :
 
 Une fois déployez appeler votre EJB.
 
+poru l'appeler vous aurez besoin de la dépendences suivantes :
+```xml
+<!-- https://mvnrepository.com/artifact/org.wildfly.wildfly-http-client/wildfly-http-ejb-client -->
+<dependency>
+    <groupId>org.wildfly.wildfly-http-client</groupId>
+    <artifactId>wildfly-http-ejb-client</artifactId>
+    <version>1.0.12.Final</version>
+    <scope>test</scope>
+</dependency>
+```
+
 ##### Le session Statefull
 Creer un EJB Statefull au sein de votre module.
 
-Cet ejb sera voué à tracer un historique des calculs effectués par votre calculatrice.
+Cet ejb sera voué à tracer un historique des calculs effectués par votre calculatrice. Il possèdera deux méthodes :
+- une méthode historiser prenant en parametre l'opération et son résultat et l'archivant
+- une méthode history(int n) : qui renvoie l'historique n ou si n <= 0 l'historique complet
 
-Modifier votre code en conséquence.
+Modifier votre code en conséquence pour historiser vos calculs.
+
+Un ejb peut s'injecter via l'annotation @EJB.
+
+Démarrer en mode debug si ce n'est fait
+
+Que constatez vous ?
+
+Que faudrait il faire pour bénéficier d'un historique complet ? pensez à un certain Design Pattern
 
 #### Entity : La persistence en action
 #### Message : pourquoi on ne traiterait pas en arrière plan
