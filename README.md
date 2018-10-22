@@ -26,12 +26,12 @@ Entreprise Edition et non plus Java EE.
  ## Stack technique
  Il nous faudra pour ce TP
  - Un environnement de développement avec un support vers le déploiement automatisé vers le serveur JEE que nous utiliserons
- - un JDK au moins java 8 u 161 (dernière version 8 en date au moment de la rédaction de ce support)
+ - un JDK au moins java 8 u 191 (dernière version 8 en date au moment de la rédaction de ce support)
  - WildFly 14 
  - maven
  
  ## TP JEE
- ### Questions généralistes sur les applications web java
+ ### Questions généralistes sur les archives java
  Que signifient les extensions suivantes :
  jar ?
  war ?
@@ -60,6 +60,10 @@ Entreprise Edition et non plus Java EE.
  ### Exercice 2 : Un additionneur via HTTP
  - Créer un additionneur de deux entiers qui en POST execute la somme des entiers en paramètres et en GET renvoie le 
  dernier résultat qu'il a calculé ou undefined si rien n'est calculé.
+
+Ici nous allons utiliser les Servlets en version 4.0.1.
+
+Tout peut se faire en annotation, regardez l'annotation @WebServlet
 
 ### Exercice 3 : L'injection façon JEE avec CDI
 #### Qu 'est ce que CDI ?
@@ -90,7 +94,7 @@ Pour scanner les beans, il faut définir un fichier XML dans le répertoire META
 Une calculatrice effectue des opérations arithmétiques qui prennent en paramètre deux opérandes et leur applique un 
 opérateur.
 
-Un opération est donc composer de trois élément :
+Une opération est donc composer de trois éléments :
 - 2 paramètres
 - 1 opérandes.
 
@@ -99,22 +103,30 @@ Son code pourrait ressembler à ça :
 ```java
 public class Calculatrice {
     public static void main(String... args){
-        Operateur operateur = new AddOperateur();
+        Operation operation = new AddOperation();
         operateur.execute(leftParam, rightParam);
     }
 }
 ```
 
 - ajouter la dépendance javaee-api à votre projet.
+```xml
+<!-- https://mvnrepository.com/artifact/javax/javaee-api -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>8.0</version>
+            <scope>provided</scope>
+        </dependency>
+```
 - créer un servlet soustracteur au norme CDI.
+- pourquoi la dépendance est en scope provided ? et non en compile ?
 
 ### Exercice 4 : Les resources JNDI
 #### Qu'est ce que JNDI
 JNDI est l'acronyme de Java Naming and Directory Interface.
 
 Il s'agit de l'API d'exposition de service à destination des contextes de nommage et d'annuaire.
-
-<img src="https://www.jmdoudoux.fr/java/dej/images/jndi001.png" />  
 
 Pour définir une connexion à une ressource JNDI nous avons besoin de deux choses :
 - une fabrique de contexte
@@ -183,7 +195,7 @@ la possibilité de s'assembler pour batir une application etc...
 Ils permettent le développement rapide d'objets métiers pour des applications distribuées, sécurisées, transactionnelles
  et portables.
 
-IL existe plusieurs spécifications, la dernière en date est la 3.0
+IL existe plusieurs spécifications, la dernière en date est la 3.1
 
 C'est celle que nous utiliserons pour la suite, la spécification 2.1 est obsolète et disparaitra d'ici 2020
  des serveurs.
@@ -199,13 +211,13 @@ En fonction des serveurs, il est peut etre nécessaire d'adjoindre dans le META-
 appelé descripteur de déploiement. Voici quelques exemples :
 - ejb-jar.xml : le descripteur par défaut, équivalent au web.xml ou l'application.xml des war et ear
 - weblogic-ejb-jar.xml : le descripteur propre à weblogic
-- jboss-ejbèjar.xml : celui de jboss
+- jboss-ejb-jar.xml : celui de jboss
 - etc ...
 
 A vous de voir en fonction des infrastructures.
 
 #### Session : Le service au client
-Les EJB Session représente le type d'EJB le plus utilisé. Ils fournissent un service au client.
+Les EJB Session représentent le type d'EJB le plus utilisé. Ils fournissent un service au client.
 
 2 annotations définissent leur protocole de contact :
 - @Local
@@ -223,15 +235,18 @@ Pour définir un EJB session nous avons besoin :
 - d'un contrat, une interface dépendante d'un protocole afin d'être appelé
 - d'une implémentation définissant le type d'EJB qui nous intéresse.
 
+Les deux peuvent être liés au sein d'un objet, l'interface etant plus simple pour l'exposition aux clients pour définir
+les appels sans exposer les implémentations.
+
 ##### Le session Stateless
-- Créez un module ejb
+- Créez un module ejb au sein du projet, regarder les types de packaging maven.
 - Ajoutez un EJB effectuant le produit de deux entiers.
 - Intégrez ce module dans votre application
 - Déployez la
 
 Une fois déployez appeler votre EJB.
 
-poru l'appeler vous aurez besoin de la dépendences suivantes :
+pour l'appeler vous aurez besoin de la dépendence suivante :
 ```xml
 <!-- https://mvnrepository.com/artifact/org.wildfly.wildfly-http-client/wildfly-http-ejb-client -->
 <dependency>
@@ -257,9 +272,9 @@ Démarrer en mode debug si ce n'est fait
 
 Que constatez vous ?
 
-Que faudrait il faire pour bénéficier d'un historique complet ? pensez à un certain Design Pattern
+Que faudrait il pour unifier l'historique ? 
 
-#### Entity : La persistence en action
+#### Entity : La persistance en action
 
 Un EJB Entity est un ejb qui permet de se mapper sur un modèle relationnel de base de données.
 
@@ -269,18 +284,16 @@ De quoi aurez vous besoin pour persister votre historique ?
 
 Créer un EJB Entity qui modélise votre historique en base de données.
 Modifier votre EJB historique pour persiter vos opérations
-Ajouter une servlet qui en fonction d'un get ou d'un post persiste votre historique en base.
+Ajouter une servlet qui en fonction d'un get ou d'un post renvoie l'intégralité, ou persiste en base, votre historique.
 
 #### Message : pourquoi on ne traiterait pas en arrière plan
 
-JMS pour Java Message Service est une spécification de JEE.
+Là où les EJB Session effectuent un travail synchrone par des appels distants de méthodes, JMS (Java Message Service) 
+permet d'ajouter de l'asynchronisme dans les traitements d'applications distribuées.
 
-Là où les EJB Session effectue un travail synchrone par des appels distants de méthode, JMS permet 
-d'ajouter de l'asynchronisme dans les traitements d'applications distribuées.
-
-En effet, grace au Message Driven Bean (typiquement appelé EJB Mesasge ou Listener JMS), ces EJB
-se connectent à une Queue qui en stocke les messages, charge au serveur et au dispatch sur ses Threads
-de traitement de distribuer aux instances de MDB les messages à traiter.
+En effet, grace au Message Driven Bean (typiquement appelé EJB Message ou Listener JMS), ces EJB
+se connectent à une Queue qui stoque les messages, il est de la responsabilité du serveur de distribuer aux instances 
+de MDB les messages à traiter.
 
 ##### Passage par la case configuration.
 Avant de traiter un message, il faut créer une Queue.
@@ -288,11 +301,15 @@ Avant de traiter un message, il faut créer une Queue.
 Sous windows editez le fichier wildfly-14.0.1.Final\bin\standalone.conf.bat
 Ajouter la directive set "JAVA_OPTS=%JAVA_OPTS% -Djboss.server.default.config=standalone-full.xml"
 
+Sous linux, la même opération est possible via standalone.conf
+
 Créer une Queue dans le serveur JMS par défaut de WildFly.
 
 Le code suivant permet d'envoyer un message dans une file distante.
 
-Sous wildfly il faut un utilisateur applicatif ayant les droits de poster sur une file JMS.
+Sous wildfly il faut un utilisateur applicatif ayant les droits de poster sur une file JMS. *(attention ceci n'est pas 
+valable pour tous les serveurs JEE)*
+
 Créer un utilisateur avec le script add-user et mettez le dans le group guest
 
 ```java
@@ -335,6 +352,8 @@ ActiveMq est le moteur JMS utilisé sous WildFly, pour pouvoir vous y connecter 
 
 ```
 
+*Notez que sous Jboss EAP, il s'agit de HornetMQ, Weblogic possède sa propre implémentation, etc.*  
+
 Envoyer votre message et consulter son arrivée dans la console de WildFly
 
 Créer un MessageDrivenBean traitant les divisions sur votre calculteur.
@@ -375,6 +394,8 @@ Si la première phase de commit échoue (commit qualifié de préparatoire) alor
 sur la transaction.
 
 ## Performance et monitoring
-### Thread Dump
-### Heap Dump
-### Monitoring
+### La JVM et le Garbage Collector
+
+### La mémoire
+
+### Amusons nous avec notre calculatrice
