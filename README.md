@@ -260,7 +260,119 @@ Que constatez vous ?
 Que faudrait il faire pour bénéficier d'un historique complet ? pensez à un certain Design Pattern
 
 #### Entity : La persistence en action
+
+Un EJB Entity est un ejb qui permet de se mapper sur un modèle relationnel de base de données.
+
+A quoi cela vous fait il penser ?
+
+De quoi aurez vous besoin pour persister votre historique ?
+
+Créer un EJB Entity qui modélise votre historique en base de données.
+Modifier votre EJB historique pour persiter vos opérations
+Ajouter une servlet qui en fonction d'un get ou d'un post persiste votre historique en base.
+
 #### Message : pourquoi on ne traiterait pas en arrière plan
+
+JMS pour Java Message Service est une spécification de JEE.
+
+Là où les EJB Session effectue un travail synchrone par des appels distants de méthode, JMS permet 
+d'ajouter de l'asynchronisme dans les traitements d'applications distribuées.
+
+En effet, grace au Message Driven Bean (typiquement appelé EJB Mesasge ou Listener JMS), ces EJB
+se connectent à une Queue qui en stocke les messages, charge au serveur et au dispatch sur ses Threads
+de traitement de distribuer aux instances de MDB les messages à traiter.
+
+##### Passage par la case configuration.
+Avant de traiter un message, il faut créer une Queue.
+
+Sous windows editez le fichier wildfly-14.0.1.Final\bin\standalone.conf.bat
+Ajouter la directive set "JAVA_OPTS=%JAVA_OPTS% -Djboss.server.default.config=standalone-full.xml"
+
+Créer une Queue dans le serveur JMS par défaut de WildFly.
+
+Le code suivant permet d'envoyer un message dans une file distante.
+
+Sous wildfly il faut un utilisateur applicatif ayant les droits de poster sur une file JMS.
+Créer un utilisateur avec le script add-user et mettez le dans le group guest
+
+```java
+
+public class Test {
+
+       public void testMessageDriven() throws Exception{
+       
+               Hashtable<String,String> env = new Hashtable<>();
+               env.put(Context.INITIAL_CONTEXT_FACTORY, WildFlyInitialContextFactory.class.getName());
+               env.put(Context.PROVIDER_URL,"remote+http://localhost:8080");
+               Context context = new InitialContext(env);
+               ConnectionFactory factory = (ConnectionFactory) context.lookup("jms/RemoteConnectionFactory");
+               Connection connection = factory.createConnection(appUserName, appUserPass);
+               Queue queue = (Queue) context.lookup("jms/queue/Diviseur");
+               Session session = connection.createSession();
+               MessageProducer messageProducer = session.createProducer(queue);
+               ObjectMessage message = session.createObjectMessage();
+               message.setObject(new Operation(8L,4L,'/',-1L));
+               messageProducer.send(message);
+               messageProducer.close();
+               session.close();
+               connection.close();
+           }
+        
+}
+```
+
+ActiveMq est le moteur JMS utilisé sous WildFly, pour pouvoir vous y connecter vous aurez besoin de la dépendance
+
+```xml
+<!-- https://mvnrepository.com/artifact/org.apache.activemq/artemis-jms-client -->
+<dependency>
+    <groupId>org.apache.activemq</groupId>
+    <artifactId>artemis-jms-client</artifactId>
+    <version>2.6.3</version>
+    <scope>test</scope>
+</dependency>
+
+
+```
+
+Envoyer votre message et consulter son arrivée dans la console de WildFly
+
+Créer un MessageDrivenBean traitant les divisions sur votre calculteur.
+
+Sa signature est la suivante 
+```java
+@MessageDriven(
+    name = "DiviseurMessageEJB",
+        description = "EJB Message",
+        activationConfig = {
+                @ActivationConfigProperty( propertyName = "destinationType",
+                        propertyValue = "javax.jms.Queue"),
+                @ActivationConfigProperty( propertyName = "destination",
+                        propertyValue ="jms/queue/Diviseur")
+        }
+
+)
+public class DiviseurMessageBean implements MessageListener {
+    
+}
+``` 
+
+Vérifier la consommation de vos messages par votre servlet d'historique
+
+#### La particularité du XA et du 2 phase Commit
+
+Certaines sources de données peuvent être déployée sous un driver nommé XA Driver.
+
+Ces drivers sont particuliers au transactions distribuées faisant intervenir des composants nécessitant la mise à jour 
+de sources de données différentes au sein d'un même contexte.
+
+Tout ceci gérer sous la spécification JTA et JTS ()Java Transaction APi et Services)
+
+Le 2 phases commit permet de préparer le commit global de transaction avant que cette derniere ne soit totalement close 
+et que les sources de données soit réellement commité.
+
+Si la première phase de commit échoue (commit qualifié de préparatoire) alors un rollback global est effectué 
+sur la transaction.
 
 ## Performance et monitoring
 ### Thread Dump
