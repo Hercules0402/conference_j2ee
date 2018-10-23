@@ -263,6 +263,7 @@ Creer un EJB Statefull au sein de votre module.
 Cet ejb sera voué à tracer un historique des calculs effectués par votre calculatrice. Il possèdera deux méthodes :
 - une méthode historiser prenant en parametre l'opération et son résultat et l'archivant
 - une méthode history(int n) : qui renvoie l'historique n ou si n <= 0 l'historique complet
+- Il devra aussi contenir une liste de chaine de caracteres contenant les operations qui auront été demandées.
 
 Modifier votre code en conséquence pour historiser vos calculs.
 
@@ -288,7 +289,8 @@ Ajouter une servlet qui en fonction d'un get ou d'un post renvoie l'intégralit�
 
 #### Message : pourquoi on ne traiterait pas en arrière plan
 
-Là où les EJB Session effectuent un travail synchrone par des appels distants de méthodes, JMS (Java Message Service) 
+Là où les EJB Session effectuent un travail synchrone par des appels distants de méthodes, JMS (Java Message Service / 
+JSR 343 2.0 du 20 mars 2013) 
 permet d'ajouter de l'asynchronisme dans les traitements d'applications distribuées.
 
 En effet, grace au Message Driven Bean (typiquement appelé EJB Message ou Listener JMS), ces EJB
@@ -296,12 +298,15 @@ se connectent à une Queue qui stoque les messages, il est de la responsabilité
 de MDB les messages à traiter.
 
 ##### Passage par la case configuration.
-Avant de traiter un message, il faut créer une Queue.
+Avant de traiter un message, il faut créer une Queue. Par défaut, la version de WildFly que nous utilisons ne permet pas 
+d'utiliser JMS. Il faut ajouter l'extension. 
 
-Sous windows editez le fichier wildfly-14.0.1.Final\bin\standalone.conf.bat
+Pour ce faire :
+
+- Sous windows editez le fichier wildfly-14.0.1.Final\bin\standalone.conf.bat
 Ajouter la directive set "JAVA_OPTS=%JAVA_OPTS% -Djboss.server.default.config=standalone-full.xml"
 
-Sous linux, la même opération est possible via standalone.conf
+- Sous linux, la même opération est possible via standalone.conf
 
 Créer une Queue dans le serveur JMS par défaut de WildFly.
 
@@ -352,7 +357,7 @@ ActiveMq est le moteur JMS utilisé sous WildFly, pour pouvoir vous y connecter 
 
 ```
 
-*Notez que sous Jboss EAP, il s'agit de HornetMQ, Weblogic possède sa propre implémentation, etc.*  
+*Notez que sous JBoss EAP, il s'agit de HornetMQ, Weblogic possède sa propre implémentation, etc.*  
 
 Envoyer votre message et consulter son arrivée dans la console de WildFly
 
@@ -385,7 +390,7 @@ Certaines sources de données peuvent être déployée sous un driver nommé XA 
 Ces drivers sont particuliers au transactions distribuées faisant intervenir des composants nécessitant la mise à jour 
 de sources de données différentes au sein d'un même contexte.
 
-Tout ceci gérer sous la spécification JTA et JTS ()Java Transaction APi et Services)
+Tout ceci gérer sous la spécification JTA et JTS (Java Transaction APi et Services)
 
 Le 2 phases commit permet de préparer le commit global de transaction avant que cette derniere ne soit totalement close 
 et que les sources de données soit réellement commité.
@@ -396,6 +401,91 @@ sur la transaction.
 ## Performance et monitoring
 ### La JVM et le Garbage Collector
 
-### La mémoire
+L'un des concepts majeurs de Java était d'être un langage multi-plateforme avec une philosiphie WORE
+ (Write One, Run Everywhere). A ces débuts, on qualifier la technologie de lente et il a fallu attendre 2000 pour bénéficier
+  des optimisations "Hotspot" connues maintenant et permettant une amélioration significative de l'exécution du ByteCode.
+  
+#### Le concept de Machine Virtuelle Java
 
-### Amusons nous avec notre calculatrice
+Java est un langage dont les fichiers sources possèdent des extensions ".java"  ; ces fichiers sont comipilés et le compilateur 
+génère un fichier ".class" contenant dy ByteCode. Ce bytecode est ensuite utilisé par la JVM et transformé en code natif 
+en fonction de plate forme.
+
+Grâce à cette séparation langage / code natif, des applications java sont optimisés sans avoir à être recompilées.
+
+D'anciens langages ont été porté pour bénéficier de ces optimisations, et d'autres ont été créés afin de pallier les manques de Java.
+
+<img src="https://blog.xebia.fr/wp-content/uploads/2013/05/compiling-to-bytecode.png" />   
+
+#### JIT : Just In Time
+
+Tout au long de son execution, la JVM profile le code afin d'en dégager les portions qui sont les plus exécutées. Ces portions de code 
+sont optimisées par l'optimiseur qui transforme et optimise le code et le place dans le "Code Cache".
+
+C'est ensuite ce code qui est executé au lieu du byte code d'origine. Cette phase est réalisée par 
+l'optimiseur JIT.
+
+Le temps de détection par l'optimiseur et la transformation du bytecode s'appelle le "Warm Up", d'où la nécessité lorsque l'on fait 
+des tests de benchmark d'executer plusieurs le code avant d'avoir une moyenne plus ou moins constante.
+
+<img src="https://blog.xebia.fr/wp-content/uploads/2013/05/profiler-and-optimiser.png" />
+
+### La mémoire et le garbage collector
+
+La mémoire de la JVM est divisée en 2 zones :
+- la Memory Heap
+- Le Meta Space (ou PermGen pour java < 8)
+
+#### Le Meta Space
+Le Méta Space et directement la mémoire physique de la machine (avant java 8, le PermGen pour "Permanent Generation" avait une taill 
+définie limitée qui engendrait des soucis de java.lang.OutOfMemoryError : PermGen Space)
+
+C'est dans cette zone mémoire que la JVM va stoquer les structures des objets (les .class), les 
+éléments définis *__static__* dans le code.
+
+#### La Memory Heap
+La Heap est la zone mémoire utilisée par la JVM pour les instanciations et le cycle de vie 
+des objets au gré de l'exécution du code.
+
+Cette zone est subdivisée en 2 parties :
+- la Young generation
+- la Old generation
+
+#### La Heap et le garbage collector
+
+Le garbage collector est un garde fou qui nous permet de libérer la mémoire qui n'est plus utilisée par nos programme de façon 
+automatique.
+
+A cette fin, la Young Generation est divisée en 3 zones :
+- l'Eden Space
+- le Survivor 0
+- le Survivor 1
+
+En fonction des cycles de passage du GC et de la retenue des objets, les instances vont passer d'une zone à l'autre
+
+<img src="https://blog.xebia.fr/wp-content/uploads/2013/06/cycle-de-vie-des-objets.png" />
+
+*__Notez que ce n'est pas parce que le garbage collector existe, que ça nous empêche de concevoir intelligemment nos applications et de libérer la mémoire utilisée__*
+
+### Amusons nous avec La JVM
+
+#### JitTest
+Executez le test unitaire JitTest.
+Que constatez vous ? Comment expliquez vous le résultat ?
+
+#### Monitoring
+Que connaissez vous comme outils de monitoring ?
+
+Baissez la mémoire de votre serveur wildfly à 64Mo.
+
+Que fait l'option -XX:+HeapDumpOnOutOfMemoryError ?
+
+Creez un programme qui appelle en boucle votre EJB multiplicateur.
+
+Observez le comportement de votre JVM.
+
+Que constatez vous ?
+
+Pour stresser un peu plus, on va mettre de la charge. Le test OutOfMemTest pourra être adapté pour stresser sur 10 thread le serveur. 
+
+Que constatez vous ?
