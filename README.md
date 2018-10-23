@@ -486,6 +486,6 @@ Observez le comportement de votre JVM.
 
 Que constatez vous ?
 
-Pour stresser un peu plus, on va mettre de la charge. Le test OutOfMemTest pourra être adapté pour stresser sur 10 thread le serveur. 
+Pour stresser un peu plus, on va mettre de la charge. Le test OutOfMemTest pourra être adapté pour stresser sur 20 thread le serveur.
 
 Que constatez vous ?
