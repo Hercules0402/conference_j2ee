@@ -15,19 +15,22 @@ import java.util.concurrent.TimeUnit;
 @Ignore
 public class OutOfMemTest {
 
-    Calculator multiplicateur;
+    // Calculator multiplicateur;
 
     @Before
     public void setUp() throws Exception{
+        /*
         Hashtable<String,String> env = new Hashtable<>();
         env.put(Context.INITIAL_CONTEXT_FACTORY, WildFlyInitialContextFactory.class.getName());
         env.put(Context.PROVIDER_URL,"remote+http://localhost:8080");
         Context context = new InitialContext(env);
         multiplicateur = (Calculator) context.lookup("jee-with-ejb-ear-1.0-SNAPSHOT/jee-with-ejb-ejb-jar-1.0-SNAPSHOT/MultiplicateurEJB!fr.ig2i.calculator.Calculator");
+        */
     }
 
     @Test
     public void testOutOfMem() throws Exception{
+        /*
         int nbThread = 20;
         Executor exec = Executors.newFixedThreadPool(nbThread);
         for(int i=0; i< nbThread; i++){
@@ -42,5 +45,6 @@ public class OutOfMemTest {
             });
         }
         ((ExecutorService) exec).awaitTermination(20L, TimeUnit.MINUTES);
+        */
     }
 }
