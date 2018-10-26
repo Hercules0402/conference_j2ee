@@ -10,6 +10,7 @@
     <modules>
         <module>jee-with-ejb-ear</module>
         <module>jee-with-ejb-war</module>
+        <module>jee-with-ejb-jar</module>
     </modules>
     <packaging>pom</packaging>
 

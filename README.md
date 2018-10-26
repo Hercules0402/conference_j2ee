@@ -103,7 +103,7 @@ Son code pourrait ressembler à ça :
 ```java
 public class Calculatrice {
     public static void main(String... args){
-        Operation operation = new AddOperation();
+        Operation beans = new AddOperation();
         operateur.execute(leftParam, rightParam);
     }
 }
@@ -119,7 +119,7 @@ public class Calculatrice {
             <scope>provided</scope>
         </dependency>
 ```
-- créer un servlet soustracteur au norme CDI.
+- créer un servlets soustracteur au norme CDI.
 - pourquoi la dépendance est en scope provided ? et non en compile ?
 
 ### Exercice 4 : Les resources JNDI
@@ -183,7 +183,7 @@ Créer un Main.java qui effectue un contexte lookup via les éléments suivant :
 - le schéma du protocole pour WildFly est "remote+http://"
 
 ##### En application JEE
-Créer une nouvelle servlet HelloServlet qui injecte une référence JNDI simple et affiche son contenu.
+Créer une nouvelle servlets HelloServlet qui injecte une référence JNDI simple et affiche son contenu.
 
 L'injection d'une resource JNDI se fait via l'annotation @Resource
 
@@ -263,7 +263,7 @@ Creer un EJB Statefull au sein de votre module.
 Cet ejb sera voué à tracer un historique des calculs effectués par votre calculatrice. Il possèdera deux méthodes :
 - une méthode historiser prenant en parametre l'opération et son résultat et l'archivant
 - une méthode history(int n) : qui renvoie l'historique n ou si n <= 0 l'historique complet
-- Il devra aussi contenir une liste de chaine de caracteres contenant les operations qui auront été demandées.
+- Il devra aussi contenir une liste de chaine de caracteres contenant les beans qui auront été demandées.
 
 Modifier votre code en conséquence pour historiser vos calculs.
 
@@ -285,7 +285,7 @@ De quoi aurez vous besoin pour persister votre historique ?
 
 Créer un EJB Entity qui modélise votre historique en base de données.
 Modifier votre EJB historique pour persiter vos opérations
-Ajouter une servlet qui en fonction d'un get ou d'un post renvoie l'intégralité, ou persiste en base, votre historique.
+Ajouter une servlets qui en fonction d'un get ou d'un post renvoie l'intégralité, ou persiste en base, votre historique.
 
 #### Message : pourquoi on ne traiterait pas en arrière plan
 
@@ -381,7 +381,7 @@ public class DiviseurMessageBean implements MessageListener {
 }
 ``` 
 
-Vérifier la consommation de vos messages par votre servlet d'historique
+Vérifier la consommation de vos messages par votre servlets d'historique
 
 #### La particularité du XA et du 2 phase Commit
 

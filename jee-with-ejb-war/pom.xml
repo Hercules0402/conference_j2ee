@@ -28,6 +28,13 @@
             <version>1.0.9.Final</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.wildfly.wildfly-http-client/wildfly-http-ejb-client -->
+        <dependency>
+            <groupId>org.wildfly.wildfly-http-client</groupId>
+            <artifactId>wildfly-http-ejb-client</artifactId>
+            <version>1.0.12.Final</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <finalName>jee-with-ejb-war</finalName>
